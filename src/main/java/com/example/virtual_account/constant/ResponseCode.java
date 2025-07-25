@@ -27,4 +27,10 @@ public class ResponseCode {
     public static int MERCHANT_SIGNATURE_NOT_MATCH = 1005;
     // Merchant signature format not supported: 1006
     public static int MERCHANT_SIGNATURE_FORMAT_NOT_SUPPORTED = 1006;
+
+    // Create virtual account error: 11xx
+    // Virtual account already exists: 1101
+    public static int VIRTUAL_ACCOUNT_ALREADY_EXISTS = 1101;
+    // Virtual account is processing: 1102
+    public static int VIRTUAL_ACCOUNT_IS_PROCESSING = 1102;
 }

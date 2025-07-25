@@ -2,6 +2,7 @@ package com.example.virtual_account.dto.request;
 
 import java.time.LocalDateTime;
 
+import com.example.virtual_account.validator.afternow.AfterNow;
 import com.example.virtual_account.validator.allowedintvalues.AllowedIntValues;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -17,12 +18,16 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class VACreateRequest {
     @NotEmpty
@@ -56,5 +61,6 @@ public class VACreateRequest {
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(type = "string", example = "2025-07-25 14:00:00", description = "Expire time (format: yyyy-MM-dd HH:mm:ss)")
-    LocalDateTime expiredAt;
+    @AfterNow
+    String expiredAt;
 }

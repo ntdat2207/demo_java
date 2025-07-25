@@ -6,6 +6,10 @@ spring:
     property-naming-strategy: SNAKE_CASE
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Ho_Chi_Minh
+  redis:
+    host:
+    port:
+    password:
 
   application:
     name: VA

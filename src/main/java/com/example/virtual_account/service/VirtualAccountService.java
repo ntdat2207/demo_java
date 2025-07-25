@@ -2,9 +2,11 @@ package com.example.virtual_account.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.dto.request.BaseRequest;
 import com.example.virtual_account.dto.request.VACreateRequest;
 import com.example.virtual_account.dto.response.CreateVaResponse;
+import com.example.virtual_account.exception.VirtualAccountException;
 import com.example.virtual_account.util.signature.SignatureHeaderPaser;
 import com.example.virtual_account.validator.filter.RequestValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class VirtualAccountService {
     private final RequestValidator requestValidator;
+    private final RedisLockService redisLockService;
+    private final ObjectMapper objectMapper;
 
     public CreateVaResponse createVirtualAccount(String merchantCode, String signatureHeader, VACreateRequest payload) {
         log.info("Creating virtual account for merchant: {}", merchantCode);
@@ -30,10 +34,13 @@ public class VirtualAccountService {
 
         String payloadStr = "{}";
         try {
-            payloadStr = new ObjectMapper().writeValueAsString(payload);
+            payloadStr = objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
             payloadStr = "{}"; // Fallback to empty JSON if serialization fails
+            log.error("Failed to serialize payload to JSON", e);
         }
+
+        log.info("Payload as JSON string: {}", payloadStr);
 
         BaseRequest requestData = new BaseRequest();
         requestData.setMerchantCode(merchantCode);
@@ -42,6 +49,17 @@ public class VirtualAccountService {
         requestData.setPayload(payloadStr);
 
         requestValidator.validate(requestData);
-        return new CreateVaResponse("virtual-account-id");
+
+        String lockKey = "lock:va:create:" + payload.getOrderCode();
+        try {
+            return redisLockService.executeWithLock(lockKey, 30, () -> {
+                // Logic tạo virtual account
+                log.info("Creating virtual account for orderCode={}", payload.getOrderCode());
+                Thread.sleep(5000);
+                return new CreateVaResponse("virtual-account-id");
+            });
+        } catch (Exception e) {
+            throw new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_IS_PROCESSING);
+        }
     }
 }
