@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+// This class is used to validate the request signature and merchant information
 public class BaseRequest {
     String merchantCode;
     String algorithm;
