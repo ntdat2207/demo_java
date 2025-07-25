@@ -55,7 +55,6 @@ public class VirtualAccountService {
             return redisLockService.executeWithLock(lockKey, 30, () -> {
                 // Logic tạo virtual account
                 log.info("Creating virtual account for orderCode={}", payload.getOrderCode());
-                Thread.sleep(5000);
                 return new CreateVaResponse("virtual-account-id");
             });
         } catch (Exception e) {

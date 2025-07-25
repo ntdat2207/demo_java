@@ -63,4 +63,15 @@ public class GlobalExceptionHandler {
         apiResponse.setMessage(message);
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+    @SuppressWarnings("rawtypes")
+    @ExceptionHandler(value = VirtualAccountException.class)
+    ResponseEntity<ApiResponse> handlingVirtualAccountException(VirtualAccountException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+
+        ApiResponse apiResponse = new ApiResponse<>();
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+        return ResponseEntity.ok().body(apiResponse);
+    }
 }
