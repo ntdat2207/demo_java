@@ -13,7 +13,12 @@ public enum ErrorCode {
     MERCHANT_ALGORITHM_NOT_SUPPORTED(ResponseCode.MERCHANT_ALGORITHM_NOT_SUPPORTED, "Merchant algorithm not supported"),
     MERCHANT_SIGNATURE_NOT_MATCH(ResponseCode.MERCHANT_SIGNATURE_NOT_MATCH, "Merchant signature does not match"),
     MERCHANT_SIGNATURE_FORMAT_NOT_SUPPORTED(ResponseCode.MERCHANT_SIGNATURE_FORMAT_NOT_SUPPORTED,
-            "Merchant signature format not supported");
+            "Merchant signature format not supported"),
+    VIRTUAL_ACCOUNT_ALREADY_EXISTS(ResponseCode.VIRTUAL_ACCOUNT_ALREADY_EXISTS, "Virtual account already exists"),
+    VIRTUAL_ACCOUNT_IS_PROCESSING(ResponseCode.VIRTUAL_ACCOUNT_IS_PROCESSING, "Virtual account is processing"),
+    VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED(ResponseCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, "Bank not supported"),
+    VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED(ResponseCode.VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED,
+            "Virtual account order code duplicated");
 
     private final int code;
     private final String message;

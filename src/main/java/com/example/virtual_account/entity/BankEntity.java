@@ -11,21 +11,22 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "virtual_accounts")
+@Table(name = "banks")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
 @Builder
-public class VirtualAccountEntity extends BaseEntity {
-    Long merchantId;
-    Long bankId;
-    String account;
-    String name;
-    Long amount;
-    int type;
-    String orderCode;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class BankEntity extends BaseEntity {
+    String bankNo;
+    String bankName;
+    int transferViaAccountNo;
+    int transferViaCardNo;
     int status;
-    String expiredAt;
+    int isDeleted;
+    String bankShortName;
+    String sacombankBankName;
+    String citadBankCode;
+    String citadVietinbankCode;
 }
