@@ -1,7 +1,5 @@
 package com.example.virtual_account.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -13,21 +11,22 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "virtual_accounts")
+@Table(name = "mrc_keys")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
 @Builder
-public class VirtualAccountEntity extends BaseEntity {
-    Long merchantId;
-    Long bankId;
-    String account;
-    String name;
-    Long amount;
-    int type;
-    String orderCode;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class BankEntity extends BaseEntity {
+    String bankNo;
+    String bankName;
+    int transferViaAccountNo;
+    int transferViaCardNo;
     int status;
-    LocalDateTime expiredAt;
+    int isDeleted;
+    String bankShortName;
+    String sacombankBankName;
+    String citadBankCode;
+    String citadVietinbankCode;
 }

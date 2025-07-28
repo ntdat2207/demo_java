@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> apiResponse = new ApiResponse<>();
         apiResponse.setCode(ErrorCode.VALIDATE_ERROR.getCode());
         apiResponse.setMessage(message);
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.ok().body(apiResponse);
     }
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> apiResponse = new ApiResponse<>();
         apiResponse.setCode(ErrorCode.VALIDATE_ERROR.getCode());
         apiResponse.setMessage(message);
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.ok().body(apiResponse);
     }
 
     @SuppressWarnings("rawtypes")

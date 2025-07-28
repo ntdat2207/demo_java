@@ -1,9 +1,8 @@
 package com.example.virtual_account.dto.request;
 
-import java.time.LocalDateTime;
-
 import com.example.virtual_account.validator.afternow.AfterNow;
 import com.example.virtual_account.validator.allowedintvalues.AllowedIntValues;
+import com.example.virtual_account.validator.allowedstringvalues.AllowedStringValues;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -44,7 +43,7 @@ public class VACreateRequest {
 
     @NotNull
     @Min(1000)
-    @Schema(description = "Amount in VND", example = "1000000")
+    @Schema(description = "Amount in VND, min 1000", example = "1000000")
     Long currency;
 
     @NotBlank
@@ -63,4 +62,9 @@ public class VACreateRequest {
     @Schema(type = "string", example = "2025-07-25 14:00:00", description = "Expire time (format: yyyy-MM-dd HH:mm:ss)")
     @AfterNow
     String expiredAt;
+
+    @NotEmpty
+    @Schema(description = "Bank code, valid value: VPBANK, BIDV", example = "VPBANK")
+    @AllowedStringValues(value = { "VPBANK", "BIDV" })
+    String bankCode;
 }

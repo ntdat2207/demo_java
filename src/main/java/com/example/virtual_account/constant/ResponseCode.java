@@ -33,4 +33,6 @@ public class ResponseCode {
     public static int VIRTUAL_ACCOUNT_ALREADY_EXISTS = 1101;
     // Virtual account is processing: 1102
     public static int VIRTUAL_ACCOUNT_IS_PROCESSING = 1102;
+    // Bank not supported: 1103
+    public static int VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED = 1103;
 }
