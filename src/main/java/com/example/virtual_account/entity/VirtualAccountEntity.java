@@ -1,7 +1,5 @@
 package com.example.virtual_account.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,5 +27,5 @@ public class VirtualAccountEntity extends BaseEntity {
     int type;
     String orderCode;
     int status;
-    LocalDateTime expiredAt;
+    String expiredAt;
 }

@@ -1,8 +1,10 @@
 package com.example.virtual_account.dto.request;
 
+import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.validator.afternow.AfterNow;
 import com.example.virtual_account.validator.allowedintvalues.AllowedIntValues;
 import com.example.virtual_account.validator.allowedstringvalues.AllowedStringValues;
+import com.example.virtual_account.validator.existsindb.ExistsInDatabase;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -44,7 +46,7 @@ public class VACreateRequest {
     @NotNull
     @Min(1000)
     @Schema(description = "Amount in VND, min 1000", example = "1000000")
-    Long currency;
+    Long amount;
 
     @NotBlank
     @Nullable
@@ -66,5 +68,6 @@ public class VACreateRequest {
     @NotEmpty
     @Schema(description = "Bank code, valid value: VPBANK, BIDV", example = "VPBANK")
     @AllowedStringValues(value = { "VPBANK", "BIDV" })
+    @ExistsInDatabase(table = "banks", column = "bank_short_name", statusColumn = "status", statusValue = BankConstant.STATUS_ACTIVE, message = "Bank not found or inactive")
     String bankCode;
 }

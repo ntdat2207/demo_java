@@ -16,7 +16,9 @@ public enum ErrorCode {
             "Merchant signature format not supported"),
     VIRTUAL_ACCOUNT_ALREADY_EXISTS(ResponseCode.VIRTUAL_ACCOUNT_ALREADY_EXISTS, "Virtual account already exists"),
     VIRTUAL_ACCOUNT_IS_PROCESSING(ResponseCode.VIRTUAL_ACCOUNT_IS_PROCESSING, "Virtual account is processing"),
-    VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED(ResponseCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, "Bank not supported");
+    VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED(ResponseCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, "Bank not supported"),
+    VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED(ResponseCode.VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED,
+            "Virtual account order code duplicated");
 
     private final int code;
     private final String message;

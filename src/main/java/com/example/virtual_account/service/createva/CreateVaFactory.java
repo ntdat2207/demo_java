@@ -2,15 +2,20 @@ package com.example.virtual_account.service.createva;
 
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.exception.VirtualAccountException;
 
+@Component
 public class CreateVaFactory {
-    public static final Map<String, CreateVaStrategy> strategies = Map.of(
-            "VPBANK", new CreateVaVPBANKStrategy(),
-            "BIDV", new CreateVaBIDVStrategy());
+    private final Map<String, CreateVaStrategy> strategies;
 
-    public static CreateVaStrategy get(String bankCode) {
+    public CreateVaFactory(Map<String, CreateVaStrategy> strategies) {
+        this.strategies = strategies;
+    }
+
+    public CreateVaStrategy get(String bankCode) {
         CreateVaStrategy strategy = strategies.get(bankCode);
         if (strategy == null) {
             throw new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED);

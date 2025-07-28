@@ -11,7 +11,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "mrc_keys")
+@Table(name = "banks")
 @Getter
 @Setter
 @AllArgsConstructor

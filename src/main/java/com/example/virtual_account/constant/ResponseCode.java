@@ -35,4 +35,6 @@ public class ResponseCode {
     public static int VIRTUAL_ACCOUNT_IS_PROCESSING = 1102;
     // Bank not supported: 1103
     public static int VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED = 1103;
+    // Virtual account order code duplicated: 1104
+    public static int VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED = 1104;
 }
