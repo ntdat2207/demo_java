@@ -26,6 +26,7 @@ public class VaExpiryWorker {
     private final RedisLockService redisLockService;
 
     private static final String LOCK_KEY = "lock:va_expiry_worker";
+    private static final int MAX_RETRY = 3;
 
     @Scheduled(fixedRate = 5000)
     public void processExpiredVa() {
@@ -37,17 +38,39 @@ public class VaExpiryWorker {
                 log.info("Processing {} expired VAs", dueIds.size());
 
                 for (String id : dueIds) {
-                    Optional<VirtualAccountEntity> optional = repository.findById(Long.valueOf(id));
+                    try {
+                        Optional<VirtualAccountEntity> optional = repository.findById(Long.valueOf(id));
+                        if (optional.isPresent()) {
+                            VirtualAccountEntity va = optional.get();
+                            Instant expiredAt = va.getExpiredAt().atZone(ZoneId.systemDefault()).toInstant();
 
-                    if (optional.isPresent()) {
-                        VirtualAccountEntity va = optional.get();
-                        Instant expiredAt = va.getExpiredAt().atZone(ZoneId.systemDefault()).toInstant();
+                            if (va.getStatus() == VirtualAccountConstant.STATUS_ACTIVE
+                                    && expiredAt.isBefore(now)) {
+                                va.setStatus(VirtualAccountConstant.STATUS_INACTIVE);
+                                repository.save(va);
+                                log.info("VA {} expired at {}, marked as INACTIVE", id, expiredAt);
 
-                        if (va.getStatus() == VirtualAccountConstant.STATUS_ACTIVE
-                                && expiredAt.isBefore(now)) {
-                            va.setStatus(VirtualAccountConstant.STATUS_INACTIVE);
-                            repository.save(va);
-                            log.info("VA {} expired at {}, marked as INACTIVE", id, expiredAt);
+                                // Xoá khỏi queue và retry count
+                                queueService.remove(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS, id);
+                                queueService.clearRetryCount(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS, id);
+                            }
+                        } else {
+                            // Không tìm thấy => xoá khỏi queue
+                            log.warn("VA {} not found in DB", id);
+                            queueService.remove(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS, id);
+                            queueService.clearRetryCount(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS, id);
+                        }
+                    } catch (Exception ex) {
+                        // Retry: tăng count, nếu vượt quá MAX_RETRY thì xoá
+                        int retryCount = queueService.incrementRetryCount(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS,
+                                id);
+                        if (retryCount >= MAX_RETRY) {
+                            log.error("VA {} failed {} times, removing from queue", id, retryCount);
+                            queueService.remove(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS, id);
+                            queueService.clearRetryCount(VirtualAccountConstant.QUEUE_UPDATE_VA_STATUS, id);
+                            // Optional: push vào dead-letter queue ở đây nếu cần
+                        } else {
+                            log.warn("VA {} failed {} times, will retry", id, retryCount, ex);
                         }
                     }
                 }

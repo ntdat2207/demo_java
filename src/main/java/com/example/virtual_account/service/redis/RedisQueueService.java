@@ -3,6 +3,7 @@ package com.example.virtual_account.service.redis;
 import java.time.Instant;
 import java.util.Collection;
 
+import org.redisson.api.RMap;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class RedisQueueService {
     RedissonClient redissonClient;
+    static String RETRY_HASH_SUFFIX = ":retry_count";
 
     public void enqueue(String redisKey, String member, Instant scoreAt, QueueEnqueueMode mode) {
         RScoredSortedSet<String> queue = redissonClient.getScoredSortedSet(redisKey);
@@ -48,5 +50,15 @@ public class RedisQueueService {
     public void remove(String redisKey, String member) {
         RScoredSortedSet<String> queue = redissonClient.getScoredSortedSet(redisKey);
         queue.remove(member);
+    }
+
+    public int incrementRetryCount(String redisKey, String member) {
+        RMap<String, Integer> retryMap = redissonClient.getMap(redisKey + RETRY_HASH_SUFFIX);
+        return retryMap.addAndGet(member, 1);
+    }
+
+    public void clearRetryCount(String redisKey, String member) {
+        RMap<String, Integer> retryMap = redissonClient.getMap(redisKey + RETRY_HASH_SUFFIX);
+        retryMap.remove(member);
     }
 }
