@@ -21,18 +21,18 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(name = "created_at")
-    String createdAt;
+    LocalDateTime createdAt;
     @Column(name = "updated_at")
-    String updatedAt;
+    LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = String.valueOf(LocalDateTime.now());
-        updatedAt = String.valueOf(LocalDateTime.now());
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = String.valueOf(LocalDateTime.now());
+        updatedAt = LocalDateTime.now();
     }
 }

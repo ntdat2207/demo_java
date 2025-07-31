@@ -1,5 +1,7 @@
 package com.example.virtual_account.dto.request;
 
+import java.time.LocalDateTime;
+
 import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.validator.afternow.AfterNow;
 import com.example.virtual_account.validator.allowedintvalues.AllowedIntValues;
@@ -63,7 +65,7 @@ public class VACreateRequest {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(type = "string", example = "2025-07-25 14:00:00", description = "Expire time (format: yyyy-MM-dd HH:mm:ss)")
     @AfterNow
-    String expiredAt;
+    LocalDateTime expiredAt;
 
     @NotEmpty
     @Schema(description = "Bank code, valid value: VPBANK, BIDV", example = "VPBANK")

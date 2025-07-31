@@ -1,4 +1,4 @@
-package com.example.virtual_account.service;
+package com.example.virtual_account.service.redis;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +40,25 @@ public class RedisLockService {
 
             return action.call();
 
+        } finally {
+            if (locked && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
+    public void executeWithLock(String key, long ttlSeconds, Runnable action) {
+        RLock lock = redissonClient.getLock(key);
+        boolean locked = false;
+        try {
+            locked = lock.tryLock(0, ttlSeconds, TimeUnit.SECONDS);
+            if (!locked) {
+                throw new IllegalStateException("Resource is already being processed. Key: " + key);
+            }
+            action.run();
+        } catch (Exception e) {
+            log.error("Error executing locked action", e);
+            throw new RuntimeException(e); // or rethrow e depending on needs
         } finally {
             if (locked && lock.isHeldByCurrentThread()) {
                 lock.unlock();

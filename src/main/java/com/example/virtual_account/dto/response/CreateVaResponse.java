@@ -1,5 +1,7 @@
 package com.example.virtual_account.dto.response;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -38,7 +40,7 @@ public class CreateVaResponse {
 
     @JsonProperty("expired_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    String expiredAt;
+    LocalDateTime expiredAt;
 
     @JsonProperty("bank_code")
     String bankCode;

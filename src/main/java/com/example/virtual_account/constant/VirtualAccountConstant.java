@@ -6,4 +6,6 @@ public class VirtualAccountConstant {
 
     public static final int TYPE_DYNAMIC = 1;
     public static final int TYPE_STATIC = 2;
+
+    public static final String QUEUE_UPDATE_VA_STATUS = "queue.update.va.status";
 }

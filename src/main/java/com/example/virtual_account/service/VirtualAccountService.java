@@ -17,6 +17,7 @@ import com.example.virtual_account.repository.MerchantRepository;
 import com.example.virtual_account.repository.VirtualAccountRequestRepository;
 import com.example.virtual_account.service.createva.CreateVaFactory;
 import com.example.virtual_account.service.createva.CreateVaStrategy;
+import com.example.virtual_account.service.redis.RedisLockService;
 import com.example.virtual_account.util.signature.SignatureHeaderPaser;
 import com.example.virtual_account.validator.filter.RequestValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
