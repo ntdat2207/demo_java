@@ -27,7 +27,7 @@ import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
 import com.example.virtual_account.dto.request.BaseRequest;
 import com.example.virtual_account.dto.request.VACreateRequest;
-import com.example.virtual_account.dto.response.CreateVaResponse;
+import com.example.virtual_account.dto.response.VACreateResponse;
 import com.example.virtual_account.entity.BankEntity;
 import com.example.virtual_account.entity.MerchantEntity;
 import com.example.virtual_account.entity.VirtualAccountEntity;
@@ -132,7 +132,7 @@ public class VirtualAccountServiceTest {
                                         .thenReturn(virtualAccountEntity);
 
                         // Act
-                        CreateVaResponse response = virtualAccountService.createVirtualAccount(merchantCode,
+                        VACreateResponse response = virtualAccountService.createVirtualAccount(merchantCode,
                                         signatureHeader,
                                         vaCreateRequest);
 

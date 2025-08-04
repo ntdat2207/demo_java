@@ -18,7 +18,10 @@ public enum ErrorCode {
     VIRTUAL_ACCOUNT_IS_PROCESSING(ResponseCode.VIRTUAL_ACCOUNT_IS_PROCESSING, "Virtual account is processing"),
     VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED(ResponseCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, "Bank not supported"),
     VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED(ResponseCode.VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED,
-            "Virtual account order code duplicated");
+            "Virtual account order code duplicated"),
+    VIRTUAL_ACCOUNT_NOT_FOUND(ResponseCode.VIRTUAL_ACCOUNT_NOT_FOUND, "Virtual account not found"),
+    VIRTUAL_ACCOUNT_CANNOT_BE_UPDATED(ResponseCode.VIRTUAL_ACCOUNT_CANNOT_BE_UPDATED,
+            "Virtual account cannot be updated");
 
     private final int code;
     private final String message;
