@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
-import com.example.virtual_account.dto.request.BaseRequest;
 import com.example.virtual_account.dto.request.VACreateRequest;
 import com.example.virtual_account.dto.request.VAUpdateRequest;
 import com.example.virtual_account.dto.response.VACreateResponse;
@@ -26,8 +25,6 @@ import com.example.virtual_account.service.createva.CreateVaStrategy;
 import com.example.virtual_account.service.redis.RedisLockService;
 import com.example.virtual_account.service.updateva.UpdateVaFactory;
 import com.example.virtual_account.service.updateva.UpdateVaStrategy;
-import com.example.virtual_account.util.signature.SignatureHeaderPaser;
-import com.example.virtual_account.validator.filter.RequestValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class VirtualAccountService {
-    private final RequestValidator requestValidator;
     private final RedisLockService redisLockService;
     private final ObjectMapper objectMapper;
     private final BankRepository bankRepository;
@@ -52,10 +48,6 @@ public class VirtualAccountService {
         String lockKey = "lock:va:create:" + payload.getOrderCode();
         try {
             return redisLockService.executeWithLock(lockKey, 30, () -> {
-                SignatureHeaderPaser.ParsedSignature parsed = SignatureHeaderPaser.parse(signatureHeader);
-                log.info("Parsed signature algorithm: {}", parsed.algorithm());
-                log.info("Parsed signature value: {}", parsed.signature());
-
                 String payloadStr = "{}";
                 try {
                     payloadStr = objectMapper.writeValueAsString(payload);
@@ -66,18 +58,10 @@ public class VirtualAccountService {
 
                 log.info("Payload as JSON string: {}", payloadStr);
 
-                BaseRequest requestData = new BaseRequest();
-                requestData.setMerchantCode(merchantCode);
-                requestData.setAlgorithm(parsed.algorithm());
-                requestData.setSignature(parsed.signature());
-                requestData.setPayload(payloadStr);
-
-                requestValidator.validate(requestData);
-
                 log.info("Creating virtual account for orderCode={}", payload.getOrderCode());
                 // Get Bank
                 BankEntity bank = bankRepository.findByBankShortName(payload.getBankCode());
-                MerchantEntity merchant = merchantRepository.findByCode(requestData.getMerchantCode())
+                MerchantEntity merchant = merchantRepository.findByCode(merchantCode)
                         .orElseThrow(() -> new MerchantException(ErrorCode.MERCHANT_NOT_FOUND));
 
                 // Save virtual account request
@@ -118,28 +102,6 @@ public class VirtualAccountService {
         String lockKey = "lock:va:update:" + payload.getOrderCode();
         try {
             return redisLockService.executeWithLock(lockKey, 30, () -> {
-                SignatureHeaderPaser.ParsedSignature parsed = SignatureHeaderPaser.parse(signatureHeader);
-                log.info("Parsed signature algorithm: {}", parsed.algorithm());
-                log.info("Parsed signature value: {}", parsed.signature());
-
-                String payloadStr = "{}";
-                try {
-                    payloadStr = objectMapper.writeValueAsString(payload);
-                } catch (JsonProcessingException e) {
-                    payloadStr = "{}"; // Fallback to empty JSON if serialization fails
-                    log.error("Failed to serialize payload to JSON", e);
-                }
-
-                log.info("Payload as JSON string: {}", payloadStr);
-
-                BaseRequest requestData = new BaseRequest();
-                requestData.setMerchantCode(merchantCode);
-                requestData.setAlgorithm(parsed.algorithm());
-                requestData.setSignature(parsed.signature());
-                requestData.setPayload(payloadStr);
-
-                requestValidator.validate(requestData);
-
                 // Get existing virtual account
                 Optional<VirtualAccountEntity> existingVa = virtualAccountRepository
                         .findByOrderCodeAndAccount(

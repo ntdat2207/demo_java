@@ -10,6 +10,12 @@ public class ResponseCode {
     // Validate error: 400
     public static int VALIDATE_ERROR = 400;
 
+    // Header error: 600
+    public static int HEADER_ERROR = 600;
+
+    // Payload not found
+    public static int MERCHANT_PAYLOAD_NOT_FOUND = 601;
+
     // Success: 200
     public static int SUCCESS = 200;
 

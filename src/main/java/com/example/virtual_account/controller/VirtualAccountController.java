@@ -12,6 +12,7 @@ import com.example.virtual_account.dto.response.ApiResponse;
 import com.example.virtual_account.dto.response.VACreateResponse;
 import com.example.virtual_account.dto.response.VAUpdateResponse;
 import com.example.virtual_account.service.VirtualAccountService;
+import com.example.virtual_account.validator.signature.ValidateSignature;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,6 +30,7 @@ public class VirtualAccountController {
     VirtualAccountService virtualAccountService;
 
     @PostMapping("/create")
+    @ValidateSignature
     public ApiResponse<VACreateResponse> createVirtualAccount(
             @RequestBody @Valid VACreateRequest request,
             HttpServletRequest httpRequest) {
@@ -42,6 +44,7 @@ public class VirtualAccountController {
     }
 
     @PatchMapping("/update")
+    @ValidateSignature
     public ApiResponse<VAUpdateResponse> updateVirtualAccount(
             @RequestBody @Valid VAUpdateRequest request,
             HttpServletRequest httpRequest) {
