@@ -238,6 +238,28 @@ public class VirtualAccountServiceTest {
             assertEquals(VirtualAccountConstant.STATUS_ACTIVE, response.getStatus());
             verify(updateVaStrategy).updateVirtualAccount(vaUpdateRequest, virtualAccountEntity);
         }
+    }
 
+    @Test
+    void testUpdateVirtualAccount_NotFoundVA() throws Exception {
+        virtualAccountEntity.setAccount(account);
+        when(redisLockService.executeWithLock(
+                anyString(),
+                anyLong(),
+                ArgumentMatchers.<Callable<Object>>any())).thenAnswer(invocation -> {
+                    Callable<?> callable = invocation.getArgument(2);
+                    return callable.call();
+                });
+
+        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
+            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
+                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
+
+            // Act & Assert
+            VirtualAccountException exception = assertThrows(VirtualAccountException.class,
+                    () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
+                            vaUpdateRequest));
+            assertEquals(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND, exception.getErrorCode());
+        }
     }
 }
