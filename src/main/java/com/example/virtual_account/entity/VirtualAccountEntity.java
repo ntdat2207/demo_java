@@ -29,5 +29,6 @@ public class VirtualAccountEntity extends BaseEntity {
     int type;
     String orderCode;
     int status;
+    String description;
     LocalDateTime expiredAt;
 }

@@ -10,6 +10,12 @@ public class ResponseCode {
     // Validate error: 400
     public static int VALIDATE_ERROR = 400;
 
+    // Header error: 600
+    public static int HEADER_ERROR = 600;
+
+    // Payload not found
+    public static int MERCHANT_PAYLOAD_NOT_FOUND = 601;
+
     // Success: 200
     public static int SUCCESS = 200;
 
@@ -37,4 +43,8 @@ public class ResponseCode {
     public static int VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED = 1103;
     // Virtual account order code duplicated: 1104
     public static int VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED = 1104;
+    // Virtual account not found: 1105
+    public static int VIRTUAL_ACCOUNT_NOT_FOUND = 1105;
+    // Virtual account cannot be updated: 1106
+    public static int VIRTUAL_ACCOUNT_CANNOT_BE_UPDATED = 1106;
 }

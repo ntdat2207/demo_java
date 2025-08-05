@@ -27,7 +27,7 @@ import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
 import com.example.virtual_account.dto.request.BaseRequest;
 import com.example.virtual_account.dto.request.VACreateRequest;
-import com.example.virtual_account.dto.response.CreateVaResponse;
+import com.example.virtual_account.dto.response.VACreateResponse;
 import com.example.virtual_account.entity.BankEntity;
 import com.example.virtual_account.entity.MerchantEntity;
 import com.example.virtual_account.entity.VirtualAccountEntity;
@@ -40,7 +40,7 @@ import com.example.virtual_account.service.createva.CreateVaFactory;
 import com.example.virtual_account.service.createva.CreateVaStrategy;
 import com.example.virtual_account.service.redis.RedisLockService;
 import com.example.virtual_account.util.signature.SignatureHeaderPaser;
-import com.example.virtual_account.validator.filter.RequestValidator;
+import com.example.virtual_account.validator.signature.RequestValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,7 +132,7 @@ public class VirtualAccountServiceTest {
                                         .thenReturn(virtualAccountEntity);
 
                         // Act
-                        CreateVaResponse response = virtualAccountService.createVirtualAccount(merchantCode,
+                        VACreateResponse response = virtualAccountService.createVirtualAccount(merchantCode,
                                         signatureHeader,
                                         vaCreateRequest);
 

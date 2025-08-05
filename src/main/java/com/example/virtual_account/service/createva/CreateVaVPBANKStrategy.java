@@ -42,6 +42,7 @@ public class CreateVaVPBANKStrategy implements CreateVaStrategy {
                 .orderCode(request.getOrderCode())
                 .status(VirtualAccountConstant.STATUS_ACTIVE)
                 .type(request.getAccountType())
+                .description(request.getDescription())
                 .build();
 
         virtualAccountRepository.save(virtualAccount);

@@ -42,6 +42,7 @@ public class CreateVaBIDVStrategy implements CreateVaStrategy {
                 .expiredAt(request.getExpiredAt())
                 .orderCode(request.getOrderCode())
                 .status(VirtualAccountConstant.STATUS_ACTIVE)
+                .description(request.getDescription())
                 .type(request.getAccountType())
                 .build();
 

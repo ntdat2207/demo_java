@@ -1,4 +1,4 @@
-package com.example.virtual_account.validator.filter;
+package com.example.virtual_account.validator.signature;
 
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
@@ -11,6 +11,7 @@ import com.example.virtual_account.exception.MerchantException;
 import com.example.virtual_account.repository.KeyRepository;
 import com.example.virtual_account.util.signature.SignatureStrategy;
 import com.example.virtual_account.util.signature.SignatureStrategyFactory;
+import com.example.virtual_account.validator.filter.AbstractValidationHandler;
 
 import lombok.extern.slf4j.Slf4j;
 
