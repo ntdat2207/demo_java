@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
 import com.example.virtual_account.dto.request.VACreateRequest;
@@ -120,6 +121,10 @@ public class VirtualAccountService {
                 // Get Bank
                 BankEntity bank = bankRepository.findById(vaEntity.getBankId())
                         .orElseThrow(() -> new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED));
+
+                if (bank.getStatus() != BankConstant.STATUS_ACTIVE) {
+                    throw new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED);
+                }
 
                 // Update virtual account
                 UpdateVaStrategy strategy = updateVaFactory

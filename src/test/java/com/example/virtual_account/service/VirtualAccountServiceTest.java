@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
 import com.example.virtual_account.dto.request.VACreateRequest;
@@ -94,6 +95,7 @@ public class VirtualAccountServiceTest {
     private String orderCode = "ORDER_CODE_0002";
     private String bankCode = "VPBANK";
     private String account = "963336000011";
+    private Long bankId = 20L;
 
     @BeforeEach
     void setUp() {
@@ -216,7 +218,7 @@ public class VirtualAccountServiceTest {
             when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
                     .thenReturn(Optional.of(virtualAccountEntity));
 
-            when(bankRepository.findById(20L)).thenReturn(Optional.of(bankEntity));
+            when(bankRepository.findById(bankId)).thenReturn(Optional.of(bankEntity));
 
             UpdateVaStrategy updateVaStrategy = Mockito.mock(UpdateVaStrategy.class);
             when(updateVaFactory.get(anyString())).thenReturn(updateVaStrategy);
@@ -260,6 +262,35 @@ public class VirtualAccountServiceTest {
                     () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
                             vaUpdateRequest));
             assertEquals(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND, exception.getErrorCode());
+        }
+    }
+
+    @Test
+    void testUpdateVirtualAccount_NotFoundVABank() throws Exception {
+        virtualAccountEntity.setAccount(account);
+        virtualAccountEntity.setBankId(bankId);
+        bankEntity.setStatus(BankConstant.STATUS_INACTIVE);
+
+        when(redisLockService.executeWithLock(anyString(), anyLong(), ArgumentMatchers.<Callable<Object>>any()))
+                .thenAnswer(invocation -> {
+                    Callable<?> callable = invocation.getArgument(2);
+                    return callable.call();
+                });
+
+        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
+            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
+                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
+
+            when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
+                    .thenReturn(Optional.of(virtualAccountEntity));
+
+            when(bankRepository.findById(bankId)).thenReturn(Optional.of(bankEntity));
+
+            // Act & Assert
+            VirtualAccountException exception = assertThrows(VirtualAccountException.class,
+                    () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
+                            vaUpdateRequest));
+            assertEquals(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, exception.getErrorCode());
         }
     }
 }
