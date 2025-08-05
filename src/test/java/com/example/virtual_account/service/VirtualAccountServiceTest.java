@@ -43,7 +43,6 @@ import com.example.virtual_account.service.createva.CreateVaStrategy;
 import com.example.virtual_account.service.redis.RedisLockService;
 import com.example.virtual_account.service.updateva.UpdateVaFactory;
 import com.example.virtual_account.service.updateva.UpdateVaStrategy;
-import com.example.virtual_account.util.signature.SignatureHeaderPaser;
 import com.example.virtual_account.validator.signature.RequestValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -135,38 +134,33 @@ public class VirtualAccountServiceTest {
                     return callable.call();
                 });
 
-        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
-            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
-                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
+        when(objectMapper.writeValueAsString(vaCreateRequest))
+                .thenReturn("{\"orderCode\":\"ORDER_CODE_0002\",\"bankCode\":\"VPBANK\"}");
+        when(bankRepository.findByBankShortName(bankCode)).thenReturn(bankEntity);
+        when(merchantRepository.findByCode(merchantCode)).thenReturn(Optional.of(merchantEntity));
+        when(virtualAccountRequestRepository.findByOrderCode(orderCode)).thenReturn(Optional.empty());
+        when(virtualAccountRequestRepository.save(any(VirtualAccountRequestEntity.class)))
+                .thenReturn(new VirtualAccountRequestEntity());
+        when(createVaFactory.get(bankCode)).thenReturn(createVaStrategy);
+        when(createVaStrategy.createVirtualAccount(vaCreateRequest, merchantEntity, bankEntity))
+                .thenReturn(virtualAccountEntity);
 
-            when(objectMapper.writeValueAsString(vaCreateRequest))
-                    .thenReturn("{\"orderCode\":\"ORDER_CODE_0002\",\"bankCode\":\"VPBANK\"}");
-            when(bankRepository.findByBankShortName(bankCode)).thenReturn(bankEntity);
-            when(merchantRepository.findByCode(merchantCode)).thenReturn(Optional.of(merchantEntity));
-            when(virtualAccountRequestRepository.findByOrderCode(orderCode)).thenReturn(Optional.empty());
-            when(virtualAccountRequestRepository.save(any(VirtualAccountRequestEntity.class)))
-                    .thenReturn(new VirtualAccountRequestEntity());
-            when(createVaFactory.get(bankCode)).thenReturn(createVaStrategy);
-            when(createVaStrategy.createVirtualAccount(vaCreateRequest, merchantEntity, bankEntity))
-                    .thenReturn(virtualAccountEntity);
+        // Act
+        VACreateResponse response = virtualAccountService.createVirtualAccount(merchantCode,
+                signatureHeader,
+                vaCreateRequest);
 
-            // Act
-            VACreateResponse response = virtualAccountService.createVirtualAccount(merchantCode,
-                    signatureHeader,
-                    vaCreateRequest);
-
-            // Assert
-            assertNotNull(response);
-            assertEquals("VA123456", response.getAccount());
-            assertEquals("Test VA", response.getName());
-            assertEquals(100000, response.getAmount());
-            assertEquals(VirtualAccountConstant.TYPE_DYNAMIC, response.getType());
-            assertEquals(orderCode, response.getOrderCode());
-            assertEquals(bankCode, response.getBankCode());
-            assertEquals(VirtualAccountConstant.STATUS_ACTIVE, response.getStatus());
-            verify(virtualAccountRequestRepository).save(any(VirtualAccountRequestEntity.class));
-            verify(createVaStrategy).createVirtualAccount(vaCreateRequest, merchantEntity, bankEntity);
-        }
+        // Assert
+        assertNotNull(response);
+        assertEquals("VA123456", response.getAccount());
+        assertEquals("Test VA", response.getName());
+        assertEquals(100000, response.getAmount());
+        assertEquals(VirtualAccountConstant.TYPE_DYNAMIC, response.getType());
+        assertEquals(orderCode, response.getOrderCode());
+        assertEquals(bankCode, response.getBankCode());
+        assertEquals(VirtualAccountConstant.STATUS_ACTIVE, response.getStatus());
+        verify(virtualAccountRequestRepository).save(any(VirtualAccountRequestEntity.class));
+        verify(createVaStrategy).createVirtualAccount(vaCreateRequest, merchantEntity, bankEntity);
     }
 
     @Test
@@ -182,27 +176,23 @@ public class VirtualAccountServiceTest {
         when(objectMapper.writeValueAsString(vaCreateRequest))
                 .thenReturn("{\"orderCode\":\"ORDER_CODE_0001\",\"bankCode\":\"VPBANK\"}");
 
-        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
-            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
-                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
+        when(bankRepository.findByBankShortName(bankCode)).thenReturn(bankEntity);
+        when(merchantRepository.findByCode(merchantCode)).thenReturn(Optional.of(merchantEntity));
+        when(virtualAccountRequestRepository.findByOrderCode(orderCode))
+                .thenReturn(Optional.of(new VirtualAccountRequestEntity()));
 
-            when(bankRepository.findByBankShortName(bankCode)).thenReturn(bankEntity);
-            when(merchantRepository.findByCode(merchantCode)).thenReturn(Optional.of(merchantEntity));
-            when(virtualAccountRequestRepository.findByOrderCode(orderCode))
-                    .thenReturn(Optional.of(new VirtualAccountRequestEntity()));
-
-            // Act & Assert
-            VirtualAccountException exception = assertThrows(VirtualAccountException.class,
-                    () -> virtualAccountService.createVirtualAccount(merchantCode, signatureHeader,
-                            vaCreateRequest));
-            assertEquals(ErrorCode.VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED, exception.getErrorCode());
-        }
+        // Act & Assert
+        VirtualAccountException exception = assertThrows(VirtualAccountException.class,
+                () -> virtualAccountService.createVirtualAccount(merchantCode, signatureHeader,
+                        vaCreateRequest));
+        assertEquals(ErrorCode.VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED, exception.getErrorCode());
     }
 
     @Test
     void testUpdateVirtualAccount_Success() throws Exception {
         virtualAccountEntity.setBankId(20L);
         bankEntity.setId(20L);
+        bankEntity.setStatus(BankConstant.STATUS_ACTIVE);
         when(redisLockService.executeWithLock(
                 anyString(),
                 anyLong(),
@@ -211,35 +201,30 @@ public class VirtualAccountServiceTest {
                     return callable.call();
                 });
 
-        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
-            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
-                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
+        when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
+                .thenReturn(Optional.of(virtualAccountEntity));
 
-            when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
-                    .thenReturn(Optional.of(virtualAccountEntity));
+        when(bankRepository.findById(bankId)).thenReturn(Optional.of(bankEntity));
 
-            when(bankRepository.findById(bankId)).thenReturn(Optional.of(bankEntity));
+        UpdateVaStrategy updateVaStrategy = Mockito.mock(UpdateVaStrategy.class);
+        when(updateVaFactory.get(anyString())).thenReturn(updateVaStrategy);
+        when(updateVaStrategy.updateVirtualAccount(any(), any())).thenReturn(virtualAccountEntity);
 
-            UpdateVaStrategy updateVaStrategy = Mockito.mock(UpdateVaStrategy.class);
-            when(updateVaFactory.get(anyString())).thenReturn(updateVaStrategy);
-            when(updateVaStrategy.updateVirtualAccount(any(), any())).thenReturn(virtualAccountEntity);
+        // Act
+        VAUpdateResponse response = virtualAccountService.updateVirtualAccount(merchantCode,
+                signatureHeader,
+                vaUpdateRequest);
 
-            // Act
-            VAUpdateResponse response = virtualAccountService.updateVirtualAccount(merchantCode,
-                    signatureHeader,
-                    vaUpdateRequest);
-
-            // Assert
-            assertNotNull(response);
-            assertEquals("VA123456", response.getAccount());
-            assertEquals("Test VA", response.getName());
-            assertEquals(100000, response.getAmount());
-            assertEquals(VirtualAccountConstant.TYPE_DYNAMIC, response.getType());
-            assertEquals(orderCode, response.getOrderCode());
-            assertEquals(bankCode, response.getBankCode());
-            assertEquals(VirtualAccountConstant.STATUS_ACTIVE, response.getStatus());
-            verify(updateVaStrategy).updateVirtualAccount(vaUpdateRequest, virtualAccountEntity);
-        }
+        // Assert
+        assertNotNull(response);
+        assertEquals("VA123456", response.getAccount());
+        assertEquals("Test VA", response.getName());
+        assertEquals(100000, response.getAmount());
+        assertEquals(VirtualAccountConstant.TYPE_DYNAMIC, response.getType());
+        assertEquals(orderCode, response.getOrderCode());
+        assertEquals(bankCode, response.getBankCode());
+        assertEquals(VirtualAccountConstant.STATUS_ACTIVE, response.getStatus());
+        verify(updateVaStrategy).updateVirtualAccount(vaUpdateRequest, virtualAccountEntity);
     }
 
     @Test
@@ -253,16 +238,11 @@ public class VirtualAccountServiceTest {
                     return callable.call();
                 });
 
-        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
-            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
-                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
-
-            // Act & Assert
-            VirtualAccountException exception = assertThrows(VirtualAccountException.class,
-                    () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
-                            vaUpdateRequest));
-            assertEquals(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND, exception.getErrorCode());
-        }
+        // Act & Assert
+        VirtualAccountException exception = assertThrows(VirtualAccountException.class,
+                () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
+                        vaUpdateRequest));
+        assertEquals(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -277,20 +257,16 @@ public class VirtualAccountServiceTest {
                     return callable.call();
                 });
 
-        try (var mockedStatic = Mockito.mockStatic(SignatureHeaderPaser.class)) {
-            mockedStatic.when(() -> SignatureHeaderPaser.parse(signatureHeader))
-                    .thenReturn(new SignatureHeaderPaser.ParsedSignature("SHA256", "abc123"));
+        when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
+                .thenReturn(Optional.of(virtualAccountEntity));
 
-            when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
-                    .thenReturn(Optional.of(virtualAccountEntity));
+        when(bankRepository.findById(bankId)).thenReturn(Optional.of(bankEntity));
 
-            when(bankRepository.findById(bankId)).thenReturn(Optional.of(bankEntity));
+        // Act & Assert
+        VirtualAccountException exception = assertThrows(VirtualAccountException.class,
+                () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
+                        vaUpdateRequest));
+        assertEquals(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, exception.getErrorCode());
 
-            // Act & Assert
-            VirtualAccountException exception = assertThrows(VirtualAccountException.class,
-                    () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
-                            vaUpdateRequest));
-            assertEquals(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, exception.getErrorCode());
-        }
     }
 }
