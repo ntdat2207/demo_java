@@ -13,7 +13,6 @@ import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.dto.request.BaseRequest;
 import com.example.virtual_account.exception.MerchantException;
 import com.example.virtual_account.util.signature.SignatureHeaderPaser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,11 +47,7 @@ public class SignatureValidationAspect {
                 .orElseThrow(() -> new MerchantException(ErrorCode.MERCHANT_PAYLOAD_NOT_FOUND));
 
         String payloadStr = "{}";
-        try {
-            payloadStr = objectMapper.writeValueAsString(payloadObject);
-        } catch (JsonProcessingException e) {
-            // Log và fallback
-        }
+        payloadStr = objectMapper.writeValueAsString(payloadObject);
 
         BaseRequest requestData = new BaseRequest();
         requestData.setMerchantCode(merchantCode);

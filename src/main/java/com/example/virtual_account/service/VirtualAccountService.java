@@ -122,7 +122,8 @@ public class VirtualAccountService {
                         .orElseThrow(() -> new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED));
 
                 // Update virtual account
-                UpdateVaStrategy strategy = updateVaFactory.get(bank.getBankShortName() + "_UPDATE");
+                UpdateVaStrategy strategy = updateVaFactory
+                        .get(bank.getBankShortName() + VirtualAccountConstant.UPDATE_VA_COMPONENT);
                 VirtualAccountEntity virtualAccount = strategy.updateVirtualAccount(payload, vaEntity);
 
                 return VAUpdateResponse.builder()

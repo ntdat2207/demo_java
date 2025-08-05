@@ -2,11 +2,12 @@ package com.example.virtual_account.service.updateva;
 
 import org.springframework.stereotype.Component;
 
+import com.example.virtual_account.constant.VirtualAccountConstant;
 import com.example.virtual_account.dto.request.VAUpdateRequest;
 import com.example.virtual_account.entity.VirtualAccountEntity;
 import com.example.virtual_account.repository.VirtualAccountRepository;
 
-@Component("BIDV_UPDATE")
+@Component("BIDV" + VirtualAccountConstant.UPDATE_VA_COMPONENT)
 public class UpdateVaBIDVStrategy implements UpdateVaStrategy {
 
     private VirtualAccountRepository virtualAccountRepository;
