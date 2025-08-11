@@ -2,7 +2,11 @@ package com.example.virtual_account.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,6 +26,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class VirtualAccountEntity extends BaseEntity {
     Long merchantId;
+
+    @Column(name = "bank_id", insertable = false, updatable = false)
     Long bankId;
     String account;
     String name;
@@ -31,4 +37,9 @@ public class VirtualAccountEntity extends BaseEntity {
     int status;
     String description;
     LocalDateTime expiredAt;
+
+    // Belongs to Bank
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bank_id", nullable = false)
+    private BankEntity bank;
 }

@@ -1,4 +1,4 @@
-package com.example.virtual_account.dto.response;
+package com.example.virtual_account.dto.response.va;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class VAUpdateResponse {
+public class VACreateResponse {
     @JsonProperty("account")
     String account;
 

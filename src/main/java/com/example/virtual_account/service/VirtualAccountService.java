@@ -7,10 +7,11 @@ import org.springframework.stereotype.Service;
 import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
-import com.example.virtual_account.dto.request.VACreateRequest;
-import com.example.virtual_account.dto.request.VAUpdateRequest;
-import com.example.virtual_account.dto.response.VACreateResponse;
-import com.example.virtual_account.dto.response.VAUpdateResponse;
+import com.example.virtual_account.dto.request.va.VACreateRequest;
+import com.example.virtual_account.dto.request.va.VAUpdateRequest;
+import com.example.virtual_account.dto.response.va.VACreateResponse;
+import com.example.virtual_account.dto.response.va.VAGetResponse;
+import com.example.virtual_account.dto.response.va.VAUpdateResponse;
 import com.example.virtual_account.entity.BankEntity;
 import com.example.virtual_account.entity.MerchantEntity;
 import com.example.virtual_account.entity.VirtualAccountEntity;
@@ -45,7 +46,7 @@ public class VirtualAccountService {
     private final VirtualAccountRequestRepository virtualAccountRequestRepository;
     private final VirtualAccountRepository virtualAccountRepository;
 
-    public VACreateResponse createVirtualAccount(String merchantCode, String signatureHeader, VACreateRequest payload) {
+    public VACreateResponse createVirtualAccount(String merchantCode, VACreateRequest payload) {
         String lockKey = "lock:va:create:" + payload.getOrderCode();
         try {
             return redisLockService.executeWithLock(lockKey, 30, () -> {
@@ -99,7 +100,7 @@ public class VirtualAccountService {
         }
     }
 
-    public VAUpdateResponse updateVirtualAccount(String merchantCode, String signatureHeader, VAUpdateRequest payload) {
+    public VAUpdateResponse updateVirtualAccount(String merchantCode, VAUpdateRequest payload) {
         String lockKey = "lock:va:update:" + payload.getOrderCode();
         try {
             return redisLockService.executeWithLock(lockKey, 30, () -> {
@@ -148,5 +149,25 @@ public class VirtualAccountService {
         } catch (Exception e) {
             throw new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_IS_PROCESSING);
         }
+    }
+
+    public VAGetResponse getVirtualAccount(String account, String orderCode) {
+        Optional<VirtualAccountEntity> existsVa = virtualAccountRepository.findByOrderCodeAndAccount(orderCode,
+                account);
+        if (existsVa.isEmpty()) {
+            throw new VirtualAccountException(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND);
+        }
+
+        VirtualAccountEntity vaEntity = existsVa.get();
+        return VAGetResponse.builder()
+                .account(account)
+                .name(vaEntity.getName())
+                .amount(vaEntity.getAmount())
+                .type(vaEntity.getType())
+                .orderCode(vaEntity.getOrderCode())
+                .status(vaEntity.getStatus())
+                .expiredAt(vaEntity.getExpiredAt())
+                .bankCode(vaEntity.getBank().getBankShortName())
+                .build();
     }
 }
