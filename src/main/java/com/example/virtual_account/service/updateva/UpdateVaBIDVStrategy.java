@@ -3,7 +3,7 @@ package com.example.virtual_account.service.updateva;
 import org.springframework.stereotype.Component;
 
 import com.example.virtual_account.constant.VirtualAccountConstant;
-import com.example.virtual_account.dto.request.VAUpdateRequest;
+import com.example.virtual_account.dto.request.va.VAUpdateRequest;
 import com.example.virtual_account.entity.VirtualAccountEntity;
 import com.example.virtual_account.repository.VirtualAccountRepository;
 

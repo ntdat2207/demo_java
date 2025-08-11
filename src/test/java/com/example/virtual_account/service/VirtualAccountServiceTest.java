@@ -25,10 +25,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.constant.ErrorCode;
 import com.example.virtual_account.constant.VirtualAccountConstant;
-import com.example.virtual_account.dto.request.VACreateRequest;
-import com.example.virtual_account.dto.request.VAUpdateRequest;
-import com.example.virtual_account.dto.response.VACreateResponse;
-import com.example.virtual_account.dto.response.VAUpdateResponse;
+import com.example.virtual_account.dto.request.va.VACreateRequest;
+import com.example.virtual_account.dto.request.va.VAUpdateRequest;
+import com.example.virtual_account.dto.response.va.VACreateResponse;
+import com.example.virtual_account.dto.response.va.VAGetResponse;
+import com.example.virtual_account.dto.response.va.VAUpdateResponse;
 import com.example.virtual_account.entity.BankEntity;
 import com.example.virtual_account.entity.MerchantEntity;
 import com.example.virtual_account.entity.VirtualAccountEntity;
@@ -90,7 +91,6 @@ public class VirtualAccountServiceTest {
     private MerchantEntity merchantEntity;
     private VirtualAccountEntity virtualAccountEntity;
     private String merchantCode = "DATNT";
-    private String signatureHeader = "algo=SHA256&signature=abc123xyz";
     private String orderCode = "ORDER_CODE_0002";
     private String bankCode = "VPBANK";
     private String account = "963336000011";
@@ -147,7 +147,6 @@ public class VirtualAccountServiceTest {
 
         // Act
         VACreateResponse response = virtualAccountService.createVirtualAccount(merchantCode,
-                signatureHeader,
                 vaCreateRequest);
 
         // Assert
@@ -183,7 +182,7 @@ public class VirtualAccountServiceTest {
 
         // Act & Assert
         VirtualAccountException exception = assertThrows(VirtualAccountException.class,
-                () -> virtualAccountService.createVirtualAccount(merchantCode, signatureHeader,
+                () -> virtualAccountService.createVirtualAccount(merchantCode,
                         vaCreateRequest));
         assertEquals(ErrorCode.VIRTUAL_ACCOUNT_ORDER_CODE_DUPLICATED, exception.getErrorCode());
     }
@@ -212,7 +211,6 @@ public class VirtualAccountServiceTest {
 
         // Act
         VAUpdateResponse response = virtualAccountService.updateVirtualAccount(merchantCode,
-                signatureHeader,
                 vaUpdateRequest);
 
         // Assert
@@ -240,7 +238,7 @@ public class VirtualAccountServiceTest {
 
         // Act & Assert
         VirtualAccountException exception = assertThrows(VirtualAccountException.class,
-                () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
+                () -> virtualAccountService.updateVirtualAccount(merchantCode,
                         vaUpdateRequest));
         assertEquals(ErrorCode.VIRTUAL_ACCOUNT_NOT_FOUND, exception.getErrorCode());
     }
@@ -264,9 +262,49 @@ public class VirtualAccountServiceTest {
 
         // Act & Assert
         VirtualAccountException exception = assertThrows(VirtualAccountException.class,
-                () -> virtualAccountService.updateVirtualAccount(merchantCode, signatureHeader,
+                () -> virtualAccountService.updateVirtualAccount(merchantCode,
                         vaUpdateRequest));
         assertEquals(ErrorCode.VIRTUAL_ACCOUNT_BANK_NOT_SUPPORTED, exception.getErrorCode());
+
+    }
+
+    @Test
+    void testGetVirtualAccount_Success() throws Exception {
+        // Arrange
+        String account = "VA123456";
+        String orderCode = "ORDER123";
+        String bankCode = "VCB";
+
+        BankEntity bankEntity = new BankEntity();
+        bankEntity.setBankShortName(bankCode);
+
+        VirtualAccountEntity virtualAccountEntity = new VirtualAccountEntity();
+        virtualAccountEntity.setAccount(account);
+        virtualAccountEntity.setName("Test VA");
+        virtualAccountEntity.setAmount(100000L);
+        virtualAccountEntity.setType(VirtualAccountConstant.TYPE_DYNAMIC);
+        virtualAccountEntity.setOrderCode(orderCode);
+        virtualAccountEntity.setStatus(VirtualAccountConstant.STATUS_ACTIVE);
+        virtualAccountEntity.setBank(bankEntity);
+
+        when(virtualAccountRepository.findByOrderCodeAndAccount(orderCode, account))
+                .thenReturn(Optional.of(virtualAccountEntity));
+
+        // Act
+        VAGetResponse response = virtualAccountService.getVirtualAccount(account, orderCode);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(account, response.getAccount());
+        assertEquals("Test VA", response.getName());
+        assertEquals(100000L, response.getAmount());
+        assertEquals(VirtualAccountConstant.TYPE_DYNAMIC, response.getType());
+        assertEquals(orderCode, response.getOrderCode());
+        assertEquals(bankCode, response.getBankCode());
+        assertEquals(VirtualAccountConstant.STATUS_ACTIVE, response.getStatus());
+
+        // Verify repository method called
+        verify(virtualAccountRepository).findByOrderCodeAndAccount(orderCode, account);
 
     }
 }

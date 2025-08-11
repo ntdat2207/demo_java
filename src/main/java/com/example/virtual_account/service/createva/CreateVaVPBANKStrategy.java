@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.virtual_account.constant.VirtualAccountConstant;
-import com.example.virtual_account.dto.request.VACreateRequest;
+import com.example.virtual_account.dto.request.va.VACreateRequest;
 import com.example.virtual_account.entity.BankEntity;
 import com.example.virtual_account.entity.MerchantEntity;
 import com.example.virtual_account.entity.VirtualAccountEntity;
@@ -34,7 +34,6 @@ public class CreateVaVPBANKStrategy implements CreateVaStrategy {
         String account = vaNumberService.generate(prefix, redisKey, suffixLength);
         VirtualAccountEntity virtualAccount = VirtualAccountEntity.builder()
                 .merchantId(merchant.getId())
-                .bankId(bank.getId())
                 .account(account)
                 .name(request.getAccountName())
                 .amount(request.getAmount())
@@ -43,6 +42,7 @@ public class CreateVaVPBANKStrategy implements CreateVaStrategy {
                 .status(VirtualAccountConstant.STATUS_ACTIVE)
                 .type(request.getAccountType())
                 .description(request.getDescription())
+                .bank(bank)
                 .build();
 
         virtualAccountRepository.save(virtualAccount);

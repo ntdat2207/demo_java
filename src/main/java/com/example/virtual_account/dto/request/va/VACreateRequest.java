@@ -1,8 +1,12 @@
-package com.example.virtual_account.dto.request;
+package com.example.virtual_account.dto.request.va;
 
 import java.time.LocalDateTime;
 
+import com.example.virtual_account.constant.BankConstant;
 import com.example.virtual_account.validator.afternow.AfterNow;
+import com.example.virtual_account.validator.allowedintvalues.AllowedIntValues;
+import com.example.virtual_account.validator.allowedstringvalues.AllowedStringValues;
+import com.example.virtual_account.validator.existsindb.ExistsInDatabase;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -28,7 +32,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class VAUpdateRequest {
+public class VACreateRequest {
     @NotEmpty
     @Size(max = 50, min = 1)
     @Pattern(regexp = "^[a-zA-Z0-9\\s']+$")
@@ -36,7 +40,10 @@ public class VAUpdateRequest {
     String accountName;
 
     @NotNull
-    String account;
+    @AllowedIntValues(value = { 1, 2 })
+    @Schema(description = "Account type: 1 - Dynamic VA collects the exact amount once, 2 - Static VA collects the free amount, free number of times", allowableValues = {
+            "1", "2" }, example = "1")
+    int accountType;
 
     @NotNull
     @Min(1000)
@@ -59,4 +66,10 @@ public class VAUpdateRequest {
     @Schema(type = "string", example = "2025-07-25 14:00:00", description = "Expire time (format: yyyy-MM-dd HH:mm:ss)")
     @AfterNow
     LocalDateTime expiredAt;
+
+    @NotEmpty
+    @Schema(description = "Bank code, valid value: VPBANK, BIDV", example = "VPBANK")
+    @AllowedStringValues(value = { "VPBANK", "BIDV" })
+    @ExistsInDatabase(table = "banks", column = "bank_short_name", statusColumn = "status", statusValue = BankConstant.STATUS_ACTIVE, message = "Bank not found or inactive")
+    String bankCode;
 }
